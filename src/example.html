@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harmony Player</title>
+    <style>
+        /* Base Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        /* Dark Theme */
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2d2d2d;
+            --accent: #6366f1; /* Indigo */
+            --accent-light: #818cf8;
+            --text-primary: #f5f5f5;
+            --text-secondary: #aaaaaa;
+            --border: #333333;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 80px); /* Leave space for player bar */
+        }
+
+        /* Sidebar (Playlist) */
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .add-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .add-btn:hover {
+            background-color: var(--accent-light);
+        }
+
+        .playlist {
+            list-style: none;
+        }
+
+        .playlist-item {
+            padding: 0.8rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .playlist-item:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .playlist-item.active {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .track-info {
+            overflow: hidden;
+        }
+
+        .track-title {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-artist {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Main Content (Player) */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .cover-container {
+            width: 280px;
+            height: 280px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .track-metadata {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .current-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .current-artist {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Player Controls */
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: color 0.2s;
+        }
+
+        .control-btn:hover {
+            color: var(--accent);
+        }
+
+        .play-btn {
+            background-color: var(--accent);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05);
+            background-color: var(--accent-light);
+            color: white;
+        }
+
+        /* Progress & Volume */
+        .progress-container {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: var(--bg-tertiary);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .volume-slider {
+            flex: 1;
+            height: 6px;
+            background-color: var(--bg-tertiary);
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .volume-fill {
+            height: 100%;
+            background-color: var(--accent);
+            border-radius: 3px;
+            width: 70%;
+        }
+
+        /* Playback Modes */
+        .mode-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .mode-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: color 0.2s;
+        }
+
+        .mode-btn.active {
+            color: var(--accent);
+        }
+
+        /* Footer Player Bar (Mobile/Compact) */
+        .player-bar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            height: 80px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 200px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .cover-container {
+                width: 200px;
+                height: 200px;
+            }
+        }
+    </style>
+    <!-- Optional: Font Awesome for icons -->
+     <!-- this behavior is bad -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar: Playlist -->
+        <div class="sidebar">
+            <h2><i class="fas fa-music"></i> Harmony Player</h2>
+            <button class="add-btn" id="addTracksBtn">
+                <i class="fas fa-plus"></i> Add Tracks
+            </button>
+            <ul class="playlist" id="playlist"></ul>
+        </div>
+
+        <!-- Main Content: Player -->
+        <div class="main-content">
+            <div class="cover-container">
+                <img src="assets/default-cover.png" alt="Track Cover" class="cover" id="coverImg">
+            </div>
+            <div class="track-metadata">
+                <h1 class="current-title" id="currentTitle">No Track Selected</h1>
+                <p class="current-artist" id="currentArtist">Add tracks to begin</p>
+            </div>
+
+            <!-- Playback Controls -->
+            <div class="player-controls">
+                <button class="control-btn" id="prevBtn"><i class="fas fa-step-backward"></i></button>
+                <button class="control-btn play-btn" id="playBtn"><i class="fas fa-play"></i></button>
+                <button class="control-btn" id="nextBtn"><i class="fas fa-step-forward"></i></button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="time-info">
+                    <span id="currentTime">00:00</span>
+                    <span id="totalTime">00:00</span>
+                </div>
+            </div>
+
+            <!-- Volume & Modes -->
+            <div class="volume-container">
+                <button class="control-btn" id="volumeBtn"><i class="fas fa-volume-up"></i></button>
+                <div class="volume-slider" id="volumeSlider">
+                    <div class="volume-fill" id="volumeFill"></div>
+                </div>
+                <div class="mode-controls">
+                    <button class="mode-btn" id="shuffleBtn"><i class="fas fa-shuffle"></i></button>
+                    <button class="mode-btn" id="repeatBtn"><i class="fas fa-repeat"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Element -->
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        // DOM Elements
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playlist = document.getElementById('playlist');
+        const addTracksBtn = document.getElementById('addTracksBtn');
+        const playBtn = document.getElementById('playBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
+        const volumeBtn = document.getElementById('volumeBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeFill = document.getElementById('volumeFill');
+        const coverImg = document.getElementById('coverImg');
+        const currentTitle = document.getElementById('currentTitle');
+        const currentArtist = document.getElementById('currentArtist');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        const repeatBtn = document.getElementById('repeatBtn');
+
+        // State
+        let playlistTracks = [];
+        let currentTrackIndex = -1;
+        let isPlaying = false;
+        let isShuffle = false;
+        let isRepeat = false;
+        let volume = 0.7;
+
+        // Initialize
+        audioPlayer.volume = volume;
+        volumeFill.style.width = `${volume * 100}%`;
+
+        // Add Tracks (File Input)
+        addTracksBtn.addEventListener('click', () => {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'audio/mp3';
+            fileInput.multiple = true;
+            fileInput.onchange = (e) => {
+                const files = e.target.files;
+                if (files.length === 0) return;
+
+                // Add files to playlist
+                for (const file of files) {
+                    const track = {
+                        name: file.name.replace(/\.mp3$/i, ''),
+                        artist: 'Unknown Artist', // Replace with ID3 data from C++
+                        path: URL.createObjectURL(file),
+                        cover: 'assets/default-cover.png' // Replace with ID3 cover from C++
+                    };
+                    playlistTracks.push(track);
+                    addTrackToUI(track);
+                }
+
+                // Auto-play first track if none is playing
+                if (currentTrackIndex === -1) {
+                    playTrack(0);
+                }
+            };
+            fileInput.click();
+        });
+
+        // Add Track to UI
+        function addTrackToUI(track) {
+            const li = document.createElement('li');
+            li.className = 'playlist-item';
+            li.innerHTML = `
+                <i class="fas fa-music"></i>
+                <div class="track-info">
+                    <div class="track-title">${track.name}</div>
+                    <div class="track-artist">${track.artist}</div>
+                </div>
+            `;
+            li.addEventListener('click', () => {
+                const index = playlistTracks.findIndex(t => t.path === track.path);
+                playTrack(index);
+            });
+            playlist.appendChild(li);
+        }
+
+        // Play Track
+        function playTrack(index) {
+            if (index >= playlistTracks.length || index < 0) return;
+
+            // Update state
+            currentTrackIndex = index;
+            const track = playlistTracks[index];
+            audioPlayer.src = track.path;
+
+            // Update UI
+            updateActivePlaylistItem();
+            coverImg.src = track.cover;
+            currentTitle.textContent = track.name;
+            currentArtist.textContent = track.artist;
+
+            // Play audio
+            audioPlayer.play();
+            isPlaying = true;
+            updatePlayBtnIcon();
+        }
+
+        // Update Active Playlist Item
+        function updateActivePlaylistItem() {
+            const items = playlist.querySelectorAll('.playlist-item');
+            items.forEach((item, index) => {
+                item.classList.toggle('active', index === currentTrackIndex);
+            });
+        }
+
+        // Play/Pause Toggle
+        playBtn.addEventListener('click', () => {
+            if (currentTrackIndex === -1 && playlistTracks.length > 0) {
+                playTrack(0);
+                return;
+            }
+            if (isPlaying) {
+                audioPlayer.pause();
+            } else {
+                audioPlayer.play();
+            }
+            isPlaying = !isPlaying;
+            updatePlayBtnIcon();
+        });
+
+        // Update Play Button Icon
+        function updatePlayBtnIcon() {
+            playBtn.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+        }
+
+        // Previous Track
+        prevBtn.addEventListener('click', () => {
+            if (currentTrackIndex <= 0) {
+                playTrack(playlistTracks.length - 1);
+            } else {
+                playTrack(currentTrackIndex - 1);
+            }
+        });
+
+        // Next Track
+        nextBtn.addEventListener('click', () => {
+            if (isShuffle) {
+                const randomIndex = Math.floor(Math.random() * playlistTracks.length);
+                playTrack(randomIndex);
+            } else if (currentTrackIndex >= playlistTracks.length - 1) {
+                playTrack(0);
+            } else {
+                playTrack(currentTrackIndex + 1);
+            }
+        });
+
+        // Progress Bar Update
+        audioPlayer.addEventListener('timeupdate', () => {
+            const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            progressFill.style.width = `${progress}%`;
+            
+            // Update time display
+            currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+            totalTimeEl.textContent = formatTime(audioPlayer.duration);
+        });
+
+        // Progress Bar Click
+        progressBar.addEventListener('click', (e) => {
+            const width = progressBar.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audioPlayer.duration;
+            audioPlayer.currentTime = (clickX / width) * duration;
+        });
+
+        // Volume Control
+        volumeSlider.addEventListener('click', (e) => {
+            const width = volumeSlider.clientWidth;
+            const clickX = e.offsetX;
+            volume = clickX / width;
+            audioPlayer.volume = volume;
+            volumeFill.style.width = `${volume * 100}%`;
+            updateVolumeIcon();
+        });
+
+        // Volume Mute Toggle
+        volumeBtn.addEventListener('click', () => {
+            audioPlayer.muted = !audioPlayer.muted;
+            updateVolumeIcon();
+        });
+
+        // Update Volume Icon
+        function updateVolumeIcon() {
+            if (audioPlayer.muted) {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            } else if (audioPlayer.volume < 0.3) {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
+            } else {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            }
+        }
+
+        // Playback Modes
+        shuffleBtn.addEventListener('click', () => {
+            isShuffle = !isShuffle;
+            shuffleBtn.classList.toggle('active', isShuffle);
+        });
+
+        repeatBtn.addEventListener('click', () => {
+            isRepeat = !isRepeat;
+            repeatBtn.classList.toggle('active', isRepeat);
+            audioPlayer.loop = isRepeat;
+        });
+
+        // End of Track
+        audioPlayer.addEventListener('ended', () => {
+            if (isRepeat) {
+                audioPlayer.play();
+            } else {
+                nextBtn.click();
+            }
+        });
+
+        // Format Time (seconds → MM:SS)
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // JS ↔ C++ Communication (for metadata/cover)
+        window.setTrackMetadata = (index, title, artist, coverPath) => {
+            if (playlistTracks[index]) {
+                playlistTracks[index].name = title;
+                playlistTracks[index].artist = artist;
+                playlistTracks[index].cover = coverPath;
+                
+                // Update UI if this is the current track
+                if (index === currentTrackIndex) {
+                    currentTitle.textContent = title;
+                    currentArtist.textContent = artist;
+                    coverImg.src = coverPath;
+                }
+                
+                // Update playlist item
+                const items = playlist.querySelectorAll('.playlist-item');
+                if (items[index]) {
+                    items[index].querySelector('.track-title').textContent = title;
+                    items[index].querySelector('.track-artist').textContent = artist;
+                }
+            }
+        };
+    </script>
+</body>
+</html>
