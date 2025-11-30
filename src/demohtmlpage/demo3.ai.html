@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Categories - Discover Your Sound</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #00dbde, #fc00ff, #00dbde);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 8s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .category-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 219, 222, 0.15), rgba(252, 0, 255, 0.15));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+
+        .category-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .category-card:hover::before {
+            opacity: 1;
+        }
+
+        .category-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            transition: transform 0.4s ease;
+        }
+
+        .category-card:hover .category-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .category-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .category-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 1.2rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .category-card:hover .category-tag {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px);
+        }
+
+        .rock { background-color: rgba(255, 68, 68, 0.15); }
+        .jazz { background-color: rgba(255, 193, 7, 0.15); }
+        .classical { background-color: rgba(156, 39, 176, 0.15); }
+        .electronic { background-color: rgba(33, 150, 243, 0.15); }
+        .hiphop { background-color: rgba(255, 87, 34, 0.15); }
+        .pop { background-color: rgba(233, 30, 99, 0.15); }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 219, 222, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 219, 222, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 219, 222, 0); }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .categories-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Music Categories</h1>
+        <p class="subtitle">Explore the world of sound and discover your perfect genre</p>
+    </header>
+
+    <div class="container">
+        <div class="categories-grid">
+            <div class="category-card rock">
+                <div class="category-icon">🎸</div>
+                <h3 class="category-title">Rock</h3>
+                <p class="category-description">Powerful guitar riffs, driving drums, and rebellious spirit that defined generations.</p>
+                <span class="category-tag">2,340 Albums</span>
+            </div>
+
+            <div class="category-card jazz">
+                <div class="category-icon">🎷</div>
+                <h3 class="category-title">Jazz</h3>
+                <p class="category-description">Sophisticated harmonies and improvisational mastery that speaks to the soul.</p>
+                <span class="category-tag">1,890 Albums</span>
+            </div>
+
+            <div class="category-card classical">
+                <div class="category-icon">🎻</div>
+                <h3 class="category-title">Classical</h3>
+                <p class="category-description">Timeless compositions and orchestral grandeur spanning centuries of musical genius.</p>
+                <span class="category-tag">3,120 Albums</span>
+            </div>
+
+            <div class="category-card electronic pulse">
+                <div class="category-icon">🎹</div>
+                <h3 class="category-title">Electronic</h3>
+                <p class="category-description">Synthetic sounds and digital beats creating the future of music production.</p>
+                <span class="category-tag">4,560 Albums</span>
+            </div>
+
+            <div class="category-card hiphop">
+                <div class="category-icon">🎤</div>
+                <h3 class="category-title">Hip-Hop</h3>
+                <p class="category-description">Rhythmic poetry and beats that gave voice to culture and urban storytelling.</p>
+                <span class="category-tag">3,780 Albums</span>
+            </div>
+
+            <div class="category-card pop">
+                <div class="category-icon">🎵</div>
+                <h3 class="category-title">Pop</h3>
+                <p class="category-description">Catchy melodies and universal appeal that dominate charts and hearts worldwide.</p>
+                <span class="category-tag">5,230 Albums</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,3 +1,5 @@
+# todo
+- probe that I can really host the app to any linux platform?
 
 # usage
 ```bash

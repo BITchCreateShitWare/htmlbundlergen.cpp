@@ -3,6 +3,7 @@ example.cpp
 demo*.cpp
 htmlbundlergen
 demo[1-9]
+*.gz
 
 bin/
 *.out
